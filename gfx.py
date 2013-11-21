@@ -1,5 +1,7 @@
 import pygame
-from sb_test import Graph, Topic
+#from sb_test import Graph, Topic
+import graph
+
 
 """
 TODO:
@@ -12,6 +14,8 @@ TODO:
 - Move networkx stuff here - 
 - When making new node, query topic title in command line
 - add clock to limit frame rate?
+- change variable naming weirdness, comments...
+- add a 'path' button - if two things are highlighted
 """
 
 class TextBox(pygame.sprite.Sprite):
@@ -25,7 +29,6 @@ class TextBox(pygame.sprite.Sprite):
         self.highlight = False
         self.initFont()
         self.initGroup()
-
 
     def initFont(self):
         pygame.font.init()
@@ -96,25 +99,25 @@ def main():
              
         if MousePressed==True:
             for item in RenderList: # search all items
-                if (item.in_bound(pos)):
+                if (item.textbox.in_bound(pos)):
                     Target=item # "pick up" item
                     break
             
             if Target is None: # didn't find any?
-                #Target=Node((0,0,255),pos,10) # create a new one
-                Target=TextBox('meowasdf', pos) # create a new one
+                print "Input Topic title:"
+                Target = graph.Topic(raw_input(), pos)
                 RenderList.append(Target) # add to list of things to draw
             elif doubleClick:
-                Target.highlight = not Target.highlight
+                Target.textbox.highlight = not Target.textbox.highlight
         
         if MouseDown and Target is not None: # if we are dragging something
-            Target.pos=pos # move the target with us
+            Target.textbox.pos=pos # move the target with us
         
         if MouseReleased:
             Target=None # Drop item, if we have any
             
         for item in RenderList:
-            item.render(screen) # Draw all items
+            item.textbox.render(screen) # Draw all items
 
         # TODO: draw lines from centers...
         pygame.draw.aaline(screen, (255,0,0), (20,20), (80,60))
