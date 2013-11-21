@@ -1,4 +1,6 @@
 import networkx as nx
+#from dnd import TextBox
+import gfx
 
 
 """
@@ -20,8 +22,8 @@ Potential initial code stuff:
 class Topic(object):
 
     def __init__(self, title, pos=None):
-        self.title = title
-        self.textbox = TextBox(title, pos)
+        self.title   = title
+        self.textbox = gfx.TextBox(title, pos)
     
     def __repr__(self):
         return self.title
