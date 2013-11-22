@@ -9,13 +9,7 @@ TODO:
 - add clock to limit frame rate?
 - Add another button that allows you to print a nested list / hierarchy graph thing (also maybe another that prints adjacency graph)
 - Have hierarchy viewing mode? (like press a button and can see hierarchy rather than adjacency connections)
-- remove highlighting code if not going to use? then could use double-click for expanding merged nodes, and maybe double-right click for contracting?
 - add code for hierarchy visibility - if top is visible, don't go down further (even if sub-nodes are marked as visible), but if not can keep iterating down...?
-- only allow to be expanded if has children?
-
-So, to do this, if double-clicking on something and it has children, should set its visibility to False (print something if no children). Then should auto-display children
-Then when double right-click should set all parent's visibility to True
-Perhaps should change 'visibility' to 'is_expanded' or something
 """
 
 class TextBox(pygame.sprite.Sprite):
@@ -25,7 +19,6 @@ class TextBox(pygame.sprite.Sprite):
         self.text  = text
         self.pos   = pos
         self.color = color
-        self.highlight = False
         self.initFont()
         self.initGroup()
 
@@ -54,13 +47,8 @@ class TextBox(pygame.sprite.Sprite):
         return self.rect.collidepoint(pos)
 
     def render(self, screen):
-        inverse = (255-self.color[0],255-self.color[1],255-self.color[2])
-        if self.highlight:
-            self.setBox(inverse)
-            self.setText(self.color)
-        else:
-            self.setBox(self.color)
-            self.setText(inverse)
+        self.setBox(self.color)
+        self.setText((255-self.color[0],255-self.color[1],255-self.color[2]))
         screen.blit(self.image, self.rect)
 
 
@@ -138,7 +126,6 @@ def main():
             
             #elif doubleClick:
             if target is not None and doubleClick:
-                #target.textbox.highlight = not target.textbox.highlight
                 target.expanded = G.can_expand(target)
                 
             #elif doubleRightClick:
