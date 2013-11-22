@@ -17,6 +17,8 @@ TODO:
 - change variable naming weirdness, comments...
 - add a 'path' button - if two things are highlighted
 -- OR could just do something like 'press m for menu' then that goes to command line and can enter normal commands...
+- Add another button that allows you to print a nested list / hierarchy graph thing (also maybe another that prints adjacency graph)
+- Have hierarchy viewing mode? (like press a button and can see hierarchy)
 """
 
 class TextBox(pygame.sprite.Sprite):
@@ -67,11 +69,17 @@ class TextBox(pygame.sprite.Sprite):
 
 
 def main(): 
+    # Graph stuff
+    G = graph.Graph()
+
+    # pygame stuff...
     screen  = pygame.display.set_mode((600,600))
     running = True
 
+    # key press events
     menuRequest = False
 
+    # stuff for double-click detection
     clickClock  = pygame.time.Clock()
     clickThresh = 225 # ms
     doubleClick = False
@@ -80,7 +88,7 @@ def main():
     MouseReleased = False # Released THIS FRAME
     MouseDown     = False # mouse is held down
     Target = None # target of Drag/Drop
-    RenderList = [] # list of objects
+    #RenderList = [] # list of objects
 
     while running:
         screen.fill((0,0,0)) # clear screen
@@ -93,6 +101,8 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 MousePressed=True 
                 MouseDown=True 
+                # should this be moved elsewhere to keep event handling code
+                # minimal?
                 clickClock.tick()
                 doubleClick = clickClock.get_time() <= clickThresh
                
@@ -102,18 +112,22 @@ def main():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    menuRequest = True
-                    print "ENTER!"
+                    #menuRequest = True
+                    G.run_cmd()
+                    # or could just call Graph's 'menu' stuff? or should 
+                    # have elsewhere?
              
         if MousePressed==True:
-            for item in RenderList: # search all items
+            #for item in RenderList: # search all items
+            for item in G.AG: # search all items
                 if (item.textbox.in_bound(pos)):
                     Target=item # "pick up" item
                     break
             
             if Target is None and doubleClick: 
                 Target = graph.Topic(raw_input('Topic title: '), pos)
-                RenderList.append(Target) # add to list of things to draw
+                G.add_topic(Target)
+                #RenderList.append(Target) # add to list of things to draw
             
             elif doubleClick:
                 Target.textbox.highlight = not Target.textbox.highlight
@@ -124,11 +138,20 @@ def main():
         if MouseReleased:
             Target=None # Drop item, if we have any
             
-        for item in RenderList:
+        #for item in RenderList:
+        for item in G.AG:
+            # render lines first
+            # how to make directed? maybe don't worry about for now
+            for successor in G.AG.successors(item):
+                #pygame.draw.aaline(screen, (0,255,0), (20,20), (80,60))
+                pygame.draw.aaline(screen, (0,255,0),
+                                   item.textbox.rect.center,
+                                   successor.textbox.rect.center)
+            # then render text boxes
             item.textbox.render(screen) # Draw all items
 
         # TODO: draw lines from centers...
-        pygame.draw.aaline(screen, (255,0,0), (20,20), (80,60))
+
               
         MousePressed=False # Reset these to False
         MouseReleased=False # Ditto     
