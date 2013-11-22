@@ -21,6 +21,7 @@ class TextBox(pygame.sprite.Sprite):
         self.color = color
         self.initFont()
         self.initGroup()
+        self.setBox()
 
     def initFont(self):
         pygame.font.init()
@@ -30,25 +31,28 @@ class TextBox(pygame.sprite.Sprite):
         self.group = pygame.sprite.GroupSingle()
         self.group.add(self)
 
-    def setBox(self, color):
+    def setBox(self):
         w,h = self.font.size(self.text)
         self.image = pygame.Surface((w+2*self.pad, h+2*self.pad))
-        self.image.fill(color)
+        self.image.fill(self.color)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
 
-    def setText(self, color):
+    def setText(self):
         # TODO: make auto-newline if text too long
         #       and maybe auto-ellipsis if wayyyy too long
-        x = self.font.render(self.text,True,color)
+        x = self.font.render(self.text,True,
+                             (255-self.color[0],
+                              255-self.color[1],
+                              255-self.color[2]))
         self.image.blit(x,(self.pad, self.pad))
 
     def in_bound(self, pos):
         return self.rect.collidepoint(pos)
 
     def render(self, screen):
-        self.setBox(self.color)
-        self.setText((255-self.color[0],255-self.color[1],255-self.color[2]))
+        self.setBox()
+        self.setText()
         screen.blit(self.image, self.rect)
 
 
@@ -120,18 +124,18 @@ def main():
                     target = item # "pick up" item
                     break
             
-            if target is None and doubleClick: 
-                target = graph.Topic(raw_input('Topic title: '), pos)
-                G.add_topic(target)
-            
-            #elif doubleClick:
             if target is not None and doubleClick:
                 target.expanded = G.can_expand(target)
                 
-            #elif doubleRightClick:
             if target is not None and doubleRightClick:
                 # set _all_ parent's 'expandedness' to False?
                 G.unexpand_parents(target)
+
+            if target is None and doubleClick: 
+                target = graph.Topic(raw_input('Topic title: '), pos)
+                if not G.add_topic(target):
+                    print 'That topic already exists.'
+                    target = None
         
         if mouseDown and target is not None: # if dragging
             target.textbox.pos=pos # move target 

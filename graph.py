@@ -34,7 +34,10 @@ class Graph(object):
         return None
 
     def add_topic(self, t):
-        self.AG.add_node(t)
+        if self.get_topic(t.title) == None:
+            self.AG.add_node(t)
+            return True
+        return False
 
     #def can_expand(self, title):
     def can_expand(self, t):
