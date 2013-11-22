@@ -5,20 +5,14 @@ import graph
 
 """
 TODO:
-- allow (directed...somehow) lines to be drawn (if you click on another node
-  with one highlighted?) Should...just query networkx graph from other code?
-  Or could store in nodes..
-  Or...could not make through GUI at all, make in command line and just
-  update display by looking at networkx graph...
-  Or both - can add through GUI or command line...?
-- Move networkx stuff here - 
+- TODO: figure out best way to make lines directed
 - When making new node, query topic title in command line
 - add clock to limit frame rate?
 - change variable naming weirdness, comments...
 - add a 'path' button - if two things are highlighted
 -- OR could just do something like 'press m for menu' then that goes to command line and can enter normal commands...
 - Add another button that allows you to print a nested list / hierarchy graph thing (also maybe another that prints adjacency graph)
-- Have hierarchy viewing mode? (like press a button and can see hierarchy)
+- Have hierarchy viewing mode? (like press a button and can see hierarchy rather than adjacency connections)
 """
 
 class TextBox(pygame.sprite.Sprite):
@@ -84,31 +78,31 @@ def main():
     clickThresh = 225 # ms
     doubleClick = False
 
-    MousePressed  = False # Pressed down THIS FRAME
-    MouseReleased = False # Released THIS FRAME
-    MouseDown     = False # mouse is held down
-    Target = None # target of Drag/Drop
-    #RenderList = [] # list of objects
+    # mouse press events
+    mousePressed  = False # Pressed down THIS FRAME
+    mouseReleased = False # Released THIS FRAME
+    mouseDown     = False # mouse is held down
+    target = None # target of Drag/Drop
 
     while running:
-        screen.fill((0,0,0)) # clear screen
+        screen.fill((0,0,0))
         pos=pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running=False
-                break # get out now
+                break # exit
             
             if event.type == pygame.MOUSEBUTTONDOWN:
-                MousePressed=True 
-                MouseDown=True 
+                mousePressed=True 
+                mouseDown=True 
                 # should this be moved elsewhere to keep event handling code
                 # minimal?
                 clickClock.tick()
                 doubleClick = clickClock.get_time() <= clickThresh
                
             if event.type == pygame.MOUSEBUTTONUP:
-                MouseReleased=True
-                MouseDown=False
+                mouseReleased=True
+                mouseDown=False
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
@@ -117,44 +111,37 @@ def main():
                     # or could just call Graph's 'menu' stuff? or should 
                     # have elsewhere?
              
-        if MousePressed==True:
-            #for item in RenderList: # search all items
-            for item in G.AG: # search all items
+        if mousePressed==True:
+            for item in G.AG:
                 if (item.textbox.in_bound(pos)):
-                    Target=item # "pick up" item
+                    target=item # "pick up" item
                     break
             
-            if Target is None and doubleClick: 
-                Target = graph.Topic(raw_input('Topic title: '), pos)
-                G.add_topic(Target)
-                #RenderList.append(Target) # add to list of things to draw
+            if target is None and doubleClick: 
+                target = graph.Topic(raw_input('Topic title: '), pos)
+                G.add_topic(target)
             
             elif doubleClick:
-                Target.textbox.highlight = not Target.textbox.highlight
+                target.textbox.highlight = not target.textbox.highlight
         
-        if MouseDown and Target is not None: # if we are dragging something
-            Target.textbox.pos=pos # move the target with us
+        if mouseDown and target is not None: # if dragging
+            target.textbox.pos=pos # move target 
         
-        if MouseReleased:
-            Target=None # Drop item, if we have any
+        if mouseReleased:
+            target=None # drop target
             
-        #for item in RenderList:
         for item in G.AG:
             # render lines first
             # how to make directed? maybe don't worry about for now
             for successor in G.AG.successors(item):
-                #pygame.draw.aaline(screen, (0,255,0), (20,20), (80,60))
                 pygame.draw.aaline(screen, (0,255,0),
                                    item.textbox.rect.center,
                                    successor.textbox.rect.center)
             # then render text boxes
             item.textbox.render(screen) # Draw all items
-
-        # TODO: draw lines from centers...
-
               
-        MousePressed=False # Reset these to False
-        MouseReleased=False # Ditto     
+        mousePressed=False # Reset these to False
+        mouseReleased=False # Ditto     
         menuRequest = False
         pygame.display.flip()
     return 
