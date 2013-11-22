@@ -87,6 +87,12 @@ def main():
     mouseDown     = False # mouse is held down
     target = None # target of Drag/Drop
 
+    # testing
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('b', (30,30)))
+    G.add_topic(graph.Topic('c', (50,30)))
+    G.merge('c', 'a','b')
+
     while running:
         screen.fill((0,0,0))
         pos=pygame.mouse.get_pos()
@@ -102,6 +108,8 @@ def main():
                 # minimal?
                 clickClock.tick()
                 # assumes same button pressed...
+                doubleClick = False
+                doubleRightClick = False
                 if event.button == 1: # left mouse button
                     doubleClick = clickClock.get_time() <= clickThresh
                 if event.button == 3: # right mouse button
@@ -128,9 +136,15 @@ def main():
                 target = graph.Topic(raw_input('Topic title: '), pos)
                 G.add_topic(target)
             
-            elif doubleClick:
+            #elif doubleClick:
+            if target is not None and doubleClick:
                 #target.textbox.highlight = not target.textbox.highlight
                 target.expanded = G.can_expand(target)
+                
+            #elif doubleRightClick:
+            if target is not None and doubleRightClick:
+                # set _all_ parent's 'expandedness' to False?
+                G.unexpand_parents(target)
         
         if mouseDown and target is not None: # if dragging
             target.textbox.pos=pos # move target 
