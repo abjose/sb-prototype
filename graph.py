@@ -45,13 +45,19 @@ class Graph(object):
                 return t
         return None
 
+    def add_topic(self, t):
+        self.AG.add_node(t)
+
     def add_path(self, *args):
-        """ Make a path over the passed topics. """
-        self.AG.add_path(args)
+        """ Make a path over the passed topics TITLES. """
+        self.AG.add_path([self.get_topic(a) for a in args])
 
     def merge(self, tpc, *args):
+        # tpc and *args should be topic TITLES!
         # should edges be inherited from existing resources, or "given"
         # at time of merge? (so will exist even if resources deleted)
+        tpc = self.get_topic(tpc)
+        args = [self.get_topic(a) for a in args])
         for t in args:
             self.HG.add_edge(tpc, t)
             self.AG.add_edges_from([(tpc, p) for p in self.AG.predecessors(t)])
@@ -60,7 +66,7 @@ class Graph(object):
     def split(self, tpc, *args):
         pass
 
-    def text_cmd(self):
+    def run_cmd(self):
         # ideally would be a little CLI, just do input() for now
         try: input('Enter  command: ')
         except Exception as e: print 'Command failed:', e 
