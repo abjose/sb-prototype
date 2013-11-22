@@ -5,29 +5,17 @@ import gfx
 
 """
 TODO:
-- enforce uniqueness constraint on topic titles?
-- input title rather than objects for Graph functions (but still store objects)
-
-
-Potential initial code stuff:
-- allow to make new topics
-- allow to make edges from one topic to another
-- allow to merge with sibling (suggest automatically?)
-- allow to merge with neighbor
-- merges create new topics containing a list of all immediate children
--- is this the best way to store hierarchy?
--- could instead create new graphs in the networkx graph?
--- and resources just have null subgraphs?
--- but how to figure out hierarchy for display purposes?
--- could just do the whole dual adjacency/hierarchy graph thing
+- enforce uniqueness constraint on topic titles
+- suggest likely merges automatically?
 """
 
 
 class Topic(object):
 
     def __init__(self, title, pos=None):
-        self.title   = title
-        self.textbox = gfx.TextBox(title, pos)
+        self.title    = title
+        self.expanded = False
+        self.textbox  = gfx.TextBox(title, pos)
     
     def __repr__(self):
         return self.title
@@ -48,6 +36,21 @@ class Graph(object):
     def add_topic(self, t):
         self.AG.add_node(t)
 
+    def can_expand(self, title):
+        """ Only let topics expand if they have children. """
+        t = self.get_topic(title)
+        return self.HG.successors(t) != []
+
+    def should_display(self, title, obj=None):
+        """ Return true if should display given Topic. """
+        t = self.get_topic(title) if obj==None else obj
+        if not t in self.HG:
+            return True # no ancestors - definitely display
+        else:
+            preds = self.HG.predecessors(t)
+            return not self.expanded and not any([self.should_display(None,p) 
+                                                  for p in preds])            
+
     def add_path(self, *args):
         """ Make a path over the passed topics TITLES. """
         self.AG.add_path([self.get_topic(a) for a in args])
@@ -56,6 +59,8 @@ class Graph(object):
         # tpc and *args should be topic TITLES!
         # should edges be inherited from existing resources, or "given"
         # at time of merge? (so will exist even if resources deleted)
+        # Think they should be given and then removed if necessary?...
+        # what if tpc appears in args? are self-edges allowed?
         tpc = self.get_topic(tpc)
         args = [self.get_topic(a) for a in args]
         for t in args:
