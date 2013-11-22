@@ -5,14 +5,17 @@ import graph
 
 """
 TODO:
-- TODO: figure out best way to make lines directed
-- When making new node, query topic title in command line
+- figure out best way to make lines directed
 - add clock to limit frame rate?
-- change variable naming weirdness, comments...
-- add a 'path' button - if two things are highlighted
--- OR could just do something like 'press m for menu' then that goes to command line and can enter normal commands...
 - Add another button that allows you to print a nested list / hierarchy graph thing (also maybe another that prints adjacency graph)
 - Have hierarchy viewing mode? (like press a button and can see hierarchy rather than adjacency connections)
+- remove highlighting code if not going to use? then could use double-click for expanding merged nodes, and maybe double-right click for contracting?
+- add code for hierarchy visibility - if top is visible, don't go down further (even if sub-nodes are marked as visible), but if not can keep iterating down...?
+- only allow to be expanded if has children?
+
+So, to do this, if double-clicking on something and it has children, should set its visibility to False (print something if no children). Then should auto-display children
+Then when double right-click should set all parent's visibility to True
+Perhaps should change 'visibility' to 'is_expanded' or something
 """
 
 class TextBox(pygame.sprite.Sprite):
@@ -22,7 +25,6 @@ class TextBox(pygame.sprite.Sprite):
         self.text  = text
         self.pos   = pos
         self.color = color
-        self.visible   = True
         self.highlight = False
         self.initFont()
         self.initGroup()
@@ -75,8 +77,9 @@ def main():
 
     # stuff for double-click detection
     clickClock  = pygame.time.Clock()
-    clickThresh = 225 # ms
+    clickThresh = 300 # ms
     doubleClick = False
+    doubleRightClick = False
 
     # mouse press events
     mousePressed  = False # Pressed down THIS FRAME
@@ -89,20 +92,24 @@ def main():
         pos=pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running=False
+                running = False
                 break # exit
             
             if event.type == pygame.MOUSEBUTTONDOWN:
-                mousePressed=True 
-                mouseDown=True 
+                mousePressed = True 
+                mouseDown = True 
                 # should this be moved elsewhere to keep event handling code
                 # minimal?
                 clickClock.tick()
-                doubleClick = clickClock.get_time() <= clickThresh
+                # assumes same button pressed...
+                if event.button == 1: # left mouse button
+                    doubleClick = clickClock.get_time() <= clickThresh
+                if event.button == 3: # right mouse button
+                    doubleRightClick = clickClock.get_time() <= clickThresh
                
             if event.type == pygame.MOUSEBUTTONUP:
-                mouseReleased=True
-                mouseDown=False
+                mouseReleased = True
+                mouseDown = False
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
@@ -111,10 +118,10 @@ def main():
                     # or could just call Graph's 'menu' stuff? or should 
                     # have elsewhere?
              
-        if mousePressed==True:
+        if mousePressed == True:
             for item in G.AG:
                 if (item.textbox.in_bound(pos)):
-                    target=item # "pick up" item
+                    target = item # "pick up" item
                     break
             
             if target is None and doubleClick: 
@@ -122,7 +129,8 @@ def main():
                 G.add_topic(target)
             
             elif doubleClick:
-                target.textbox.highlight = not target.textbox.highlight
+                #target.textbox.highlight = not target.textbox.highlight
+                target.expanded = G.can_expand(target)
         
         if mouseDown and target is not None: # if dragging
             target.textbox.pos=pos # move target 
@@ -131,18 +139,21 @@ def main():
             target=None # drop target
             
         for item in G.AG:
+            # don't render anything if shouldn't display
+            if not G.should_display(item):
+                continue
             # render lines first
-            # how to make directed? maybe don't worry about for now
             for successor in G.AG.successors(item):
-                pygame.draw.aaline(screen, (0,255,0),
-                                   item.textbox.rect.center,
-                                   successor.textbox.rect.center)
+                if G.should_display(successor):
+                    pygame.draw.aaline(screen, (0,255,0),
+                                       item.textbox.rect.center,
+                                       successor.textbox.rect.center)
             # then render text boxes
-            item.textbox.render(screen) # Draw all items
+            item.textbox.render(screen)
               
-        mousePressed=False # Reset these to False
-        mouseReleased=False # Ditto     
-        menuRequest = False
+        mousePressed  = False
+        mouseReleased = False 
+        menuRequest   = False
         pygame.display.flip()
     return 
     
