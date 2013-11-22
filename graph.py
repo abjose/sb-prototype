@@ -36,20 +36,27 @@ class Graph(object):
     def add_topic(self, t):
         self.AG.add_node(t)
 
-    def can_expand(self, title):
+    #def can_expand(self, title):
+    def can_expand(self, t):
         """ Only let topics expand if they have children. """
-        t = self.get_topic(title)
+        #t = self.get_topic(title)
         return self.HG.successors(t) != []
 
-    def should_display(self, title, obj=None):
+    def unexpand_parents(self, t):
+        for p in self.HG.predecessors(t):
+            p.expanded = False
+
+    #def should_display(self, title, obj=None):
+    def should_display(self, t):
         """ Return true if should display given Topic. """
-        t = self.get_topic(title) if obj==None else obj
+        # t should be an object
+        #t = self.get_topic(title) if obj==None else obj
         if not t in self.HG:
             return True # no ancestors - definitely display
         else:
             preds = self.HG.predecessors(t)
-            return not self.expanded and not any([self.should_display(None,p) 
-                                                  for p in preds])            
+            return not t.expanded and not any([self.should_display(p) 
+                                               for p in preds])            
 
     def add_path(self, *args):
         """ Make a path over the passed topics TITLES. """
