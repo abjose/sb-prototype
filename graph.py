@@ -4,6 +4,11 @@ import gfx
 
 
 """
+TODO:
+- enforce uniqueness constraint on topic titles?
+- input title rather than objects for Graph functions (but still store objects)
+
+
 Potential initial code stuff:
 - allow to make new topics
 - allow to make edges from one topic to another
@@ -15,7 +20,6 @@ Potential initial code stuff:
 -- and resources just have null subgraphs?
 -- but how to figure out hierarchy for display purposes?
 -- could just do the whole dual adjacency/hierarchy graph thing
-- Add dnd TextBoxes to Topic objects
 """
 
 
@@ -52,10 +56,17 @@ class Graph(object):
             self.HG.add_edge(tpc, t)
             self.AG.add_edges_from([(tpc, p) for p in self.AG.predecessors(t)])
             self.AG.add_edges_from([(tpc, p) for p in self.AG.successors(t)])
-        
-        
+    
     def split(self, tpc, *args):
         pass
+
+    def text_cmd(self):
+        # ideally would be a little CLI, just do input() for now
+        try: input('Enter  command: ')
+        except Exception as e: print 'Command failed:', e 
+            
+        
+        
 
 if __name__=='__main__':
 
@@ -66,8 +77,12 @@ if __name__=='__main__':
     t5 = Topic('poop5')
 
     g = Graph()
-    g.add_path(t1,t2,t3,t4,t5)
-    g.merge(Topic('fecal matter'), t1, t2)
+    #g.add_path(t1,t2,t3,t4,t5)
+    #g.merge(Topic('fecal matter'), t1, t2)
+
+    g.text_cmd()
 
     print g.AG.edges()
     print g.HG.edges()
+
+
