@@ -16,6 +16,7 @@ TODO:
 - add clock to limit frame rate?
 - change variable naming weirdness, comments...
 - add a 'path' button - if two things are highlighted
+-- OR could just do something like 'press m for menu' then that goes to command line and can enter normal commands...
 """
 
 class TextBox(pygame.sprite.Sprite):
@@ -47,7 +48,7 @@ class TextBox(pygame.sprite.Sprite):
 
     def setText(self, color):
         # TODO: make auto-newline if text too long
-        #       and maybe auto-ellipse if wayyyy too long
+        #       and maybe auto-ellipsis if wayyyy too long
         x = self.font.render(self.text,True,color)
         self.image.blit(x,(self.pad, self.pad))
 
@@ -69,6 +70,8 @@ def main():
     screen  = pygame.display.set_mode((600,600))
     running = True
 
+    menuRequest = False
+
     clickClock  = pygame.time.Clock()
     clickThresh = 225 # ms
     doubleClick = False
@@ -82,20 +85,25 @@ def main():
     while running:
         screen.fill((0,0,0)) # clear screen
         pos=pygame.mouse.get_pos()
-        for Event in pygame.event.get():
-            if Event.type == pygame.QUIT:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 running=False
                 break # get out now
             
-            if Event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 MousePressed=True 
                 MouseDown=True 
                 clickClock.tick()
                 doubleClick = clickClock.get_time() <= clickThresh
                
-            if Event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP:
                 MouseReleased=True
                 MouseDown=False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    menuRequest = True
+                    print "ENTER!"
              
         if MousePressed==True:
             for item in RenderList: # search all items
@@ -103,10 +111,10 @@ def main():
                     Target=item # "pick up" item
                     break
             
-            if Target is None: # didn't find any?
-                print "Input Topic title:"
-                Target = graph.Topic(raw_input(), pos)
+            if Target is None and doubleClick: 
+                Target = graph.Topic(raw_input('Topic title: '), pos)
                 RenderList.append(Target) # add to list of things to draw
+            
             elif doubleClick:
                 Target.textbox.highlight = not Target.textbox.highlight
         
@@ -123,7 +131,8 @@ def main():
         pygame.draw.aaline(screen, (255,0,0), (20,20), (80,60))
               
         MousePressed=False # Reset these to False
-        MouseReleased=False # Ditto        
+        MouseReleased=False # Ditto     
+        menuRequest = False
         pygame.display.flip()
     return 
     
