@@ -1,11 +1,9 @@
 import networkx as nx
-#from dnd import TextBox
 import gfx
 
 
 """
 TODO:
-- enforce uniqueness constraint on topic titles
 - suggest likely merges automatically?
 """
 
@@ -36,6 +34,7 @@ class Graph(object):
     def add_topic(self, t):
         if self.get_topic(t.title) == None:
             self.AG.add_node(t)
+            self.HG.add_node(t)
             return True
         return False
 
@@ -75,8 +74,8 @@ class Graph(object):
         args = [self.get_topic(a) for a in args]
         for t in args:
             self.HG.add_edge(tpc, t)
-            self.AG.add_edges_from([(tpc, p) for p in self.AG.predecessors(t)])
-            self.AG.add_edges_from([(tpc, p) for p in self.AG.successors(t)])
+            self.AG.add_edges_from([(p,tpc) for p in self.AG.predecessors(t)])
+            self.AG.add_edges_from([(tpc,p) for p in self.AG.successors(t)])
     
     def split(self, tpc, *args):
         pass
