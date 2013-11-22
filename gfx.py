@@ -1,5 +1,4 @@
 import pygame
-#from sb_test import Graph, Topic
 import graph
 
 
@@ -10,6 +9,9 @@ TODO:
 - Add another button that allows you to print a nested list / hierarchy graph thing (also maybe another that prints adjacency graph)
 - Have hierarchy viewing mode? (like press a button and can see hierarchy rather than adjacency connections)
 - add code for hierarchy visibility - if top is visible, don't go down further (even if sub-nodes are marked as visible), but if not can keep iterating down...?
+- Looks like edges aren't being properly 'transferred'?
+- Make 'demo' that initializes with lots of topics that can be clicked in to
+  down to 'resources'
 """
 
 class TextBox(pygame.sprite.Sprite):
@@ -81,9 +83,13 @@ def main():
 
     # testing
     G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('b', (30,30)))
-    G.add_topic(graph.Topic('c', (50,30)))
-    G.merge('c', 'a','b')
+    G.add_topic(graph.Topic('b1', (30,30)))
+    G.add_topic(graph.Topic('b2', (50,30)))
+    G.add_topic(graph.Topic('c', (70,30)))
+    G.add_topic(graph.Topic('B', (40,50)))
+    G.add_path('a','b1','c')
+    G.add_path('a','b2','c')
+    G.merge('B', 'b1','b2')
 
     while running:
         screen.fill((0,0,0))
@@ -163,4 +169,15 @@ def main():
     return 
     
 if __name__=='__main__':
+    # help text
+    print "This is a prototype for testing out graph contractions\n" + \
+          "for building 'useful' hierarchies of 'Topics'.\n\n" + \
+          "- Click and drag to move topics around.\n" + \
+          "- Double click an empty space to create a new topic.\n" + \
+          "- Double left-click to expand topics into their subtopics\n" + \
+          "- Double right-click to collapse topics into their supertopics\n" + \
+          "- Press enter to enter commands in the terminal. Examples:\n" + \
+          "    'path('t1', 't2', ...) makes a (directed) path t1->t2->...\n" + \
+          "    'merge('T', 't1', 't2', ...) merges t1, t2, ... into T\n"
+
     main() # Execute our main function
