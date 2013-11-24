@@ -5,13 +5,16 @@ import graph
 """
 TODO:
 - figure out best way to make lines directed
+- LINES AREN'T BEING DRAWN CORRECTLY
+- move the testing stuff into another file
 - add clock to limit frame rate?
 - Add another button that allows you to print a nested list / hierarchy graph thing (also maybe another that prints adjacency graph)
 - Have hierarchy viewing mode? (like press a button and can see hierarchy rather than adjacency connections)
 - add code for hierarchy visibility - if top is visible, don't go down further (even if sub-nodes are marked as visible), but if not can keep iterating down...?
-- Looks like edges aren't being properly 'transferred'?
 - Make 'demo' that initializes with lots of topics that can be clicked in to
   down to 'resources'
+  Should have most basic thing at top in center, then expands to a layer down, 
+  and each thing expands into a layer beneath it visually
 """
 
 class TextBox(pygame.sprite.Sprite):
@@ -43,10 +46,9 @@ class TextBox(pygame.sprite.Sprite):
     def setText(self):
         # TODO: make auto-newline if text too long
         #       and maybe auto-ellipsis if wayyyy too long
-        x = self.font.render(self.text,True,
-                             (255-self.color[0],
-                              255-self.color[1],
-                              255-self.color[2]))
+        x = self.font.render(self.text,True,(255-self.color[0],
+                                             255-self.color[1],
+                                             255-self.color[2]))
         self.image.blit(x,(self.pad, self.pad))
 
     def in_bound(self, pos):
@@ -82,6 +84,112 @@ def main():
     target = None # target of Drag/Drop
 
     # testing
+    # should really move this into a separate file or something
+    # make sure to have at least one non-sibling merge and one sibling merge
+    
+    # NOTE: this topic progression taken from a Hyper-Textbook on Optimization
+    #       models and applications from a class at Berkeley:
+    #       https://inst.eecs.berkeley.edu/~ee127a/book/login/index.html
+    
+    # highest-level topic for demo
+    G.add_topic(graph.Topic('Linear Algebra', (10,30)))
+
+    # subtopics of linear algebra
+    G.add_topic(graph.Topic('Vectors', (10,30)))
+    G.add_topic(graph.Topic('Matrices', (10,30)))
+    G.add_topic(graph.Topic('Linear Equations', (10,30)))
+    G.add_topic(graph.Topic('Least-Squares', (10,30)))
+    G.add_topic(graph.Topic('Eigenvalues', (10,30)))
+    G.add_topic(graph.Topic('Singular Values', (10,30)))
+    # add path and merge
+    G.add_path('Vectors','Matrices','Linear Equations', 'Least-Squares', 
+               'Eigenvalues', 'Singular Values')
+    G.add_path('Linear Algebra', 
+               'Vectors','Matrices','Linear Equations', 'Least-Squares', 
+               'Eigenvalues', 'Singular Values')
+
+    # subtopics of vectors
+    G.add_topic(graph.Topic('Vector basics', (10,30)))
+    G.add_topic(graph.Topic('Scalar products, norms and angles', (10,30)))
+    G.add_topic(graph.Topic('Projection on a line', (10,30)))
+    G.add_topic(graph.Topic('Orthogonalization', (10,30)))
+    G.add_topic(graph.Topic('Hyperplanes and half-spaces', (10,30)))
+    G.add_topic(graph.Topic('Linear functions', (10,30)))
+    G.add_topic(graph.Topic('Application: data visualization', (10,30)))
+    G.add_topic(graph.Topic('Vector exercises', (10,30)))
+    # add path and merge
+    G.add_path('Vector basics', 'Scalar products, norms and angles', 
+               'Projection on a line', 'Orthogonalization', 
+               'Hyperplanes and half-spaces', 'Linear functions', 
+               'Application: data visualization', 'Vector exercises')
+    G.merge('Vectors', 
+            'Vector basics', 'Scalar products, norms and angles', 
+            'Projection on a line', 'Orthogonalization', 
+            'Hyperplanes and half-spaces', 'Linear functions', 
+            'Application: data visualization', 'Vector exercises')
+
+    """
+    # subtopics of matrices
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    # add path and merge
+    G.add_path('a','b2','c')
+    G.merge('B', 'b1','b2')
+
+
+    # subtopics of linear equations
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    # add path and merge
+    G.add_path('a','b2','c')
+    G.merge('B', 'b1','b2')
+
+
+    # subtopics of least-squares
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    # add path and merge
+    G.add_path('a','b2','c')
+    G.merge('B', 'b1','b2')
+
+
+    # subtopics of eigenvalues
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    # add path and merge
+    G.add_path('a','b2','c')
+    G.merge('B', 'b1','b2')
+
+
+    # subtopics of singular values
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    G.add_topic(graph.Topic('a', (10,30)))
+    # add path and merge
+    G.add_path('a','b2','c')
+    G.merge('B', 'b1','b2')
+    """
+
+    """
     G.add_topic(graph.Topic('a', (10,30)))
     G.add_topic(graph.Topic('b1', (30,30)))
     G.add_topic(graph.Topic('b2', (50,30)))
@@ -90,6 +198,8 @@ def main():
     G.add_path('a','b1','c')
     G.add_path('a','b2','c')
     G.merge('B', 'b1','b2')
+    """
+
 
     while running:
         screen.fill((0,0,0))
@@ -169,7 +279,7 @@ def main():
     return 
     
 if __name__=='__main__':
-    # help text
+    # show help text
     print "This is a prototype for testing out graph contractions\n" + \
           "for building 'useful' hierarchies of 'Topics'.\n\n" + \
           "- Click and drag to move topics around.\n" + \
