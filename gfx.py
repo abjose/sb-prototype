@@ -5,16 +5,11 @@ import graph
 """
 TODO:
 - figure out best way to make lines directed
-- LINES AREN'T BEING DRAWN CORRECTLY
 - move the testing stuff into another file
 - add clock to limit frame rate?
 - Add another button that allows you to print a nested list / hierarchy graph thing (also maybe another that prints adjacency graph)
 - Have hierarchy viewing mode? (like press a button and can see hierarchy rather than adjacency connections)
 - add code for hierarchy visibility - if top is visible, don't go down further (even if sub-nodes are marked as visible), but if not can keep iterating down...?
-- Make 'demo' that initializes with lots of topics that can be clicked in to
-  down to 'resources'
-  Should have most basic thing at top in center, then expands to a layer down, 
-  and each thing expands into a layer beneath it visually
 """
 
 class TextBox(pygame.sprite.Sprite):
@@ -90,34 +85,29 @@ def main():
     # NOTE: this topic progression taken from a Hyper-Textbook on Optimization
     #       models and applications from a class at Berkeley:
     #       https://inst.eecs.berkeley.edu/~ee127a/book/login/index.html
-    
-    # highest-level topic for demo
-    G.add_topic(graph.Topic('Linear Algebra', (10,30)))
 
-    # subtopics of linear algebra
-    G.add_topic(graph.Topic('Vectors', (10,30)))
-    G.add_topic(graph.Topic('Matrices', (10,30)))
-    G.add_topic(graph.Topic('Linear Equations', (10,30)))
-    G.add_topic(graph.Topic('Least-Squares', (10,30)))
-    G.add_topic(graph.Topic('Eigenvalues', (10,30)))
-    G.add_topic(graph.Topic('Singular Values', (10,30)))
-    # add path and merge
-    G.add_path('Vectors','Matrices','Linear Equations', 'Least-Squares', 
-               'Eigenvalues', 'Singular Values')
-    G.add_path('Linear Algebra', 
-               'Vectors','Matrices','Linear Equations', 'Least-Squares', 
-               'Eigenvalues', 'Singular Values')
+    # highest-level topic for demo
+    G.add_topic(graph.Topic('Linear Algebra', (285,290)))
+
+     # subtopics of linear algebra
+    G.add_topic(graph.Topic('Vectors', (50,120)))
+    G.add_topic(graph.Topic('Matrices', (150,115)))
+    G.add_topic(graph.Topic('Linear Equations', (280,115)))
+    G.add_topic(graph.Topic('Least-Squares', (430,115)))
+    G.add_topic(graph.Topic('Eigenvalues', (500,170)))
+    G.add_topic(graph.Topic('Singular Values', (525,230)))
 
     # subtopics of vectors
-    G.add_topic(graph.Topic('Vector basics', (10,30)))
-    G.add_topic(graph.Topic('Scalar products, norms and angles', (10,30)))
-    G.add_topic(graph.Topic('Projection on a line', (10,30)))
-    G.add_topic(graph.Topic('Orthogonalization', (10,30)))
-    G.add_topic(graph.Topic('Hyperplanes and half-spaces', (10,30)))
-    G.add_topic(graph.Topic('Linear functions', (10,30)))
-    G.add_topic(graph.Topic('Application: data visualization', (10,30)))
-    G.add_topic(graph.Topic('Vector exercises', (10,30)))
-    # add path and merge
+    G.add_topic(graph.Topic('Vector basics', (60,165)))
+    G.add_topic(graph.Topic('Scalar products, norms and angles', (120,220)))
+    G.add_topic(graph.Topic('Projection on a line', (170,280)))
+    G.add_topic(graph.Topic('Orthogonalization', (250,340)))
+    G.add_topic(graph.Topic('Hyperplanes and half-spaces', (310,380)))
+    G.add_topic(graph.Topic('Linear functions', (360,430)))
+    G.add_topic(graph.Topic('Application: data visualization', (410,480)))
+    G.add_topic(graph.Topic('Vector exercises', (465,535)))
+
+    # add path and merge for vector stuff
     G.add_path('Vector basics', 'Scalar products, norms and angles', 
                'Projection on a line', 'Orthogonalization', 
                'Hyperplanes and half-spaces', 'Linear functions', 
@@ -127,67 +117,15 @@ def main():
             'Projection on a line', 'Orthogonalization', 
             'Hyperplanes and half-spaces', 'Linear functions', 
             'Application: data visualization', 'Vector exercises')
+    
+    # add path and merge for linear algebra stuff
+    G.add_path('Vectors','Matrices','Linear Equations', 'Least-Squares', 
+               'Eigenvalues', 'Singular Values')
+    G.merge('Linear Algebra', 
+            'Vectors','Matrices','Linear Equations', 'Least-Squares', 
+            'Eigenvalues', 'Singular Values')
 
-    """
-    # subtopics of matrices
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    # add path and merge
-    G.add_path('a','b2','c')
-    G.merge('B', 'b1','b2')
-
-
-    # subtopics of linear equations
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    # add path and merge
-    G.add_path('a','b2','c')
-    G.merge('B', 'b1','b2')
-
-
-    # subtopics of least-squares
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    # add path and merge
-    G.add_path('a','b2','c')
-    G.merge('B', 'b1','b2')
-
-
-    # subtopics of eigenvalues
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    # add path and merge
-    G.add_path('a','b2','c')
-    G.merge('B', 'b1','b2')
-
-
-    # subtopics of singular values
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    G.add_topic(graph.Topic('a', (10,30)))
-    # add path and merge
-    G.add_path('a','b2','c')
-    G.merge('B', 'b1','b2')
-    """
+    t = G.get_topic('Vector basics')
 
     """
     G.add_topic(graph.Topic('a', (10,30)))
@@ -236,15 +174,17 @@ def main():
              
         if mousePressed == True:
             for item in G.AG:
-                if (item.textbox.in_bound(pos)):
+                if (item.textbox.in_bound(pos)) and G.should_display(item):
                     target = item # "pick up" item
+                    print 'picked up ' + target.title
                     break
             
             if target is not None and doubleClick:
+                print 'trying to expand ' + target.title
                 target.expanded = G.can_expand(target)
                 
             if target is not None and doubleRightClick:
-                # set _all_ parent's 'expandedness' to False?
+                print 'trying to collapse ' + target.title
                 G.unexpand_parents(target)
 
             if target is None and doubleClick: 
@@ -254,23 +194,25 @@ def main():
                     target = None
         
         if mouseDown and target is not None: # if dragging
+            print 'dragging ' + target.title
+            print target.title + ' position: ' + str(target.textbox.pos)
             target.textbox.pos=pos # move target 
         
         if mouseReleased:
             target=None # drop target
             
         for item in G.AG:
-            # don't render anything if shouldn't display
-            if not G.should_display(item):
-                continue
             # render lines first
-            for successor in G.AG.successors(item):
-                if G.should_display(successor):
-                    pygame.draw.aaline(screen, (0,255,0),
-                                       item.textbox.rect.center,
-                                       successor.textbox.rect.center)
+            if G.should_display(item):
+                for successor in G.AG.successors(item):
+                    if G.should_display(successor):
+                        pygame.draw.aaline(screen, (0,255,0),
+                                           item.textbox.rect.center,
+                                           successor.textbox.rect.center)
+        for item in G.AG:
             # then render text boxes
-            item.textbox.render(screen)
+            if G.should_display(item):
+                item.textbox.render(screen)
               
         mousePressed  = False
         mouseReleased = False 
