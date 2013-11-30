@@ -194,8 +194,6 @@ def main():
                     target = None
         
         if mouseDown and target is not None: # if dragging
-            print 'dragging ' + target.title
-            print target.title + ' position: ' + str(target.textbox.pos)
             target.textbox.pos=pos # move target 
         
         if mouseReleased:
