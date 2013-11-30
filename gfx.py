@@ -230,6 +230,8 @@ if __name__=='__main__':
           "- Double right-click to collapse topics into their supertopics\n" + \
           "- Press enter to enter commands in the terminal. Examples:\n" + \
           "    'path('t1', 't2', ...) makes a (directed) path t1->t2->...\n" + \
-          "    'merge('T', 't1', 't2', ...) merges t1, t2, ... into T\n"
-
+          "    'merge('T', 't1', 't2', ...) merges t1, t2, ... into T\n" + \
+          " For example, try double-clicking Linear Algebra to expand it,\n" + \
+          " Then double-clicking 'Vectors' to expand that.\n" + \
+          " Note that only the 'Vectors' topic has further subtopics right now."
     main() # Execute our main function
