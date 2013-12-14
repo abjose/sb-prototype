@@ -1,5 +1,7 @@
 import pygame
 import graph
+import math as m
+import numpy as np
 
 
 """
@@ -204,9 +206,13 @@ def main():
             if G.should_display(item):
                 for successor in G.AG.successors(item):
                     if G.should_display(successor):
-                        pygame.draw.aaline(screen, (0,255,0),
+                        # NEW LINE CODE HERE
+                        make_directed_line(screen, 
                                            item.textbox.rect.center,
                                            successor.textbox.rect.center)
+                        #pygame.draw.aaline(screen, (0,255,0),
+                        #                   item.textbox.rect.center,
+                        #                   successor.textbox.rect.center)
         for item in G.AG:
             # then render text boxes
             if G.should_display(item):
@@ -218,6 +224,41 @@ def main():
         pygame.display.flip()
     return 
     
+def make_directed_line(screen, start, end):
+    # make a line composed of arrows
+    # TODO: interpolate colors! ...maybe.
+    scale     = 7.0
+    step_size = 25.
+    arrow = scale*np.matrix([[0.,1.],
+                             [0.,-1.],
+                             [1.,0.]])
+    x0,y0 = start
+    x1,y1 = end
+    dx = float(x0) - x1
+    dy = float(y0) - y1
+    
+    # find angles and rotation
+    th = -m.atan2(dy,dx)
+    R  = -np.matrix([[m.cos(th), -m.sin(th)],
+                     [m.sin(th), m.cos(th)]])
+    # then rotate arrow
+    arrow = arrow*R
+
+    # normalize vectors
+    d = m.sqrt(dx*dx + dy*dy)
+    dx = -dx/d if d!=0 else 0
+    dy = -dy/d if d!=0 else 0
+
+    # iterate down path
+    for offset in np.arange(0,d,step_size):
+        tx = x0 + offset*dx
+        ty = y0 + offset*dy
+        arrow_t = arrow + (tx,ty)
+        arrow_t = [(pt[0,0], pt[0,1]) for pt in arrow_t]
+        pygame.draw.polygon(screen, (0,255,0), arrow_t, 0)
+    
+
+
 if __name__=='__main__':
     # show help text
     print "This is a prototype for testing out graph contractions\n" + \
