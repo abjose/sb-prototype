@@ -61,6 +61,10 @@ who votes on what.
 
 Also have a 'participation rate'? Probabiltiy that will actually participate
 in a given round...
+
+TODO: ALSO NEED TO CHECK RELATION IS RIGHT
+
+lolz, just change so doesn't care if upvotes or downvotes exist?
 """
 
 
@@ -79,43 +83,37 @@ class User: # 'faulty oracle'
             if np.random.uniform() < self.p:
                 truth = n in self.g.nodes()
                 if np.random.uniform() > self.h: truth = not truth
-                if truth: graph[n]['upvotes'] |= self
-                else:     graph[n]['downvotes'] |= self
+                if truth: add_upvote(graph.node[n], self)
+                else:     add_downvote(graph.node[n], self)
 
         # vote on existing edges
         for i,j in graph.edges():
             if np.random.uniform() < self.p:
                 truth = (i,j) in self.g.edges()
                 if np.random.uniform() > self.h: truth = not truth
-                if truth: graph[i][j]['upvotes'] |= self
-                else:     graph[i][j]['downvotes'] |= self
+                if truth: add_upvote(graph.edge[i][j], self)
+                else:     add_downvote(graph.edge[i][j], self)
 
         # add nodes that don't yet exist in graph
         new_nodes = [n for n in self.g.nodes() if n not in graph.nodes()]
         for n in new_nodes:
             if np.random.uniform() < self.p:
                 if np.random.uniform() > self.h:
-                    # tell the truth
-                    graph.add_node(n, upvotes=set([self]), downvotes=set())
+                    graph.add_node(n, upvotes=set([self]))
                 else:
-                    # lie
-                    graph.add_node(np.random.randint(1000), 
-                                   upvotes=set([self]), downvotes=set())
+                    graph.add_node(np.random.randint(1000, 10000), 
+                                   upvotes=set([self]))
 
         # add edges that don't yet exist in graph
         new_edges = [e for e in self.g.edges() if e not in graph.edges()]
         for i,j in new_edges:
             if np.random.uniform() < self.p:
                 if np.random.uniform() > self.h:
-                    # tell the truth
-                    graph.add_edge(i,j, upvotes=set([self]), downvotes=set())
+                    graph.add_edge(i,j, upvotes=set([self]))
                 else:
-                    # lie
-                    graph.add_edge(np.random.randint(1000), 
-                                   np.random.randint(1000), 
-                                   upvotes=set([self]), downvotes=set())
-        
-        # pretty sure don't have to return graph, should have been passed as ref
+                    graph.add_edge(np.random.randint(1000,10000), 
+                                   np.random.randint(1000,10000), 
+                                   upvotes=set([self]))
 
 class Site:
     def __init__(self, pop, graph_size, connect_prob):
@@ -128,19 +126,25 @@ class Site:
         # graph meant to approximate true_graph
         self.graph = nx.DiGraph()
         # set of users with honesty values following passed distribution
-        self.users = [Foracle(true_graph, 
-                              clamp(np.random.normal(h_mean, h_sd),0.,1.),
-                              clamp(np.random.normal(m_mean, m_sd),0.,1.),
-                              clamp(np.random.normal(p_mean, p_sd),0.,1.),) 
-                      for _ in pop]
+        self.users = [User(self.true_graph, 
+                           clamp(np.random.normal(h_mean, h_sd),0.,1.),
+                           clamp(np.random.normal(m_mean, m_sd),0.,1.),
+                           clamp(np.random.normal(p_mean, p_sd),0.,1.),) 
+                      for _ in range(pop)]
         # map from user to estimated 'reliablity' of user
-        self.trust = dict()
+        #self.trust = dict()
 
     def tick(self, ):
-        pass
+        for u in self.users:
+            # SHOULD PROBABLY SHUFFLE...
+            u.browse(self.graph)
 
     def get_user_reputation(self, user):
         # iterate over graph, get idea for how right the user is...
+        # could just have numerator of sum of people that seem to be right
+        # and agree, denom opposite
+        # so if upvotes and thing has lots of upvotes, numerator += len(upvotes)
+        # and denom += len(downvotes)...can switch if downvotes look right..
         pass
 
     def get_trust_rankings(self, ):
@@ -159,15 +163,12 @@ def get_random_graph(n, p):
     G = nx.DiGraph()
     # add nodes
     G.add_nodes_from(range(n))
-    # add labeled edges
+    # add labeled nodes and edges
     for i in range(n):
         for j in range(n):
             if np.random.uniform() < p:
                 # choose what kind of edge to make and add it to the graph
-                G.add_node(i, upvotes=set(), downvotes=set())
-                G.add_node(j, upvotes=set(), downvotes=set())
-                G.add_edge(i, j, relation=get_random_relation(),
-                           upvotes=set(), downvotes=set())
+                G.add_edge(i, j, relation=get_random_relation())
     # return generated graph
     return G
         
@@ -196,7 +197,7 @@ def mutate_graph(original_graph, misbelief):
     for n in range(size):
         if np.random.uniform() < misbelief:
             # make sure not to conflict with other nodes
-            graph.add_node(size+n, upvotes=set(), downvotes=set())
+            graph.add_node(size+n)
     # remove edges
     for e in graph.edges():
         if np.random.uniform() < misbelief:
@@ -205,10 +206,14 @@ def mutate_graph(original_graph, misbelief):
     for i in graph.nodes():
         for j in graph.nodes():
             if np.random.uniform() < misbelief:
-                graph.add_edge(i,j, relation=get_random_relation(),
-                               upvotes=set(), downvotes=set())
+                graph.add_edge(i,j, relation=get_random_relation())
     # return results of mutation
     return graph
+
+def add_upvote(d, user):
+    d['upvotes'] = d.get('upvotes', set()) | {user}
+def add_downvote(d, user):
+    d['downvotes'] = d.get('downvotes', set()) | {user}
 
 
 if __name__=='__main__':
@@ -229,11 +234,17 @@ if __name__=='__main__':
     #plt.show()
     
 
-    g = get_random_graph(20, 0.1)
-    plt.subplot(211)
-    nx.draw(g)
+    #g = get_random_graph(20, 0.1)
+    #plt.subplot(211)
+    #nx.draw(g)
+    #g = mutate_graph(g, .1)
+    #plt.subplot(212)
+    #nx.draw(g)
     #plt.show()
-    g = mutate_graph(g, .1)
-    plt.subplot(212)
-    nx.draw(g)
-    plt.show()
+
+    pop = 10
+    size = 20
+    connect_prob = 0.3
+    s = Site(pop, size, connect_prob)
+    s.tick()
+    
