@@ -38,9 +38,10 @@ showing paths including all dependences between nodes...
 
 
 class Foracle:
-    def __init__(self, ground_truth_graph, honesty):
+    def __init__(self, ground_truth_graph, wrongness, honesty):
+        self.g = mutate_garph(ground_truth_graph, wrongness)
+        # wrongness is the amount the passed graph will be mutated in [0,1]
         # honesty is proportion of truths told in [0,1]
-        self.g = ground_truth_graph
         self.h = honesty
 
     def suggest_nodes(self, ):
@@ -52,24 +53,64 @@ class Foracle:
 
 
 class Querier:
-    def __init__(self, pop, mean=0.7, sd=0.3):
-        self.graph = get_random_graph()
-        self.users = [Foracle(graph, clamp(np.random.normal(mean,sd),0.,1.)) 
+    def __init__(self, pop, graph_size, connect_prob):
+        # wrongness (w) and honesty (h) distribution parameters
+        h_mean, h_sd = 0.7, 0.3
+        w_mean, w_sd = 0.2, 0.5
+        # make a random graph to try to approximate
+        self.graph = get_random_graph(graph_size, connect_prob)
+        # set of users with honesty values following passed distribution
+        self.users = [Foracle(graph, 
+                              clamp(np.random.normal(w_mean, w_sd),0.,1.), 
+                              clamp(np.random.normal(h_mean, h_sd),0.,1.))
                       for _ in pop]
-        # map from user to estimated honesty value
+        # map from user to estimated 'reliablity' of user
         self.trust = dict()
+
+    def get_trust_rankings(self, ):
+        # return list of users from high to low trust values
+        # might want to ask questions in proportion to trust instead of
+        # asking, say, top 10?
+        pass
 
 
 def clamp(n, a, b):
     # assumes a <= n <= b
     return max(min(n, b), a)
 
-
-def get_random_graph():
-    # make random graph
+def get_random_graph(n, p):
+    # make random erdos-renyi graph with n nodes and connection probability p
     # should assign types to edges!
-    pass
+    
+    # init digraph
+    G = nx.DiGraph()
+    # add nodes
+    G.add_nodes_from(range(n))
+    # add labeled edges
+    for i in range(n):
+        for j in range(n):
+            if np.random.uniform() < p:
+                # choose what kind of edge to make and add it to the graph
+                G.add_edge(i, j, relation=get_random_relation())
+    G.add_edges_from([(i,j)])
+    for i in range(n):
+        name = str(i+1)
+        
+def get_random_relation():
+    # return a random type of relation as a string
+    # these probabilities should sum to one
+    p_type_of, p_part_of, p_prereq_of = 0.25, 0.25, 0.5
+    r = np.random.uniform()
+    if r < p_type_of:
+        return 'type-of'
+    if r < p_type_of+p_part_of:
+        return 'part-of'
+    if r < p_type_of+p_part_of+p_prereq_of:
+        return 'prereq-of'
 
+def mutate_graph(graph, wrongness):
+    # mutate a graph according to wrongness value
+    pass
 
 if __name__=='__main__':
     
