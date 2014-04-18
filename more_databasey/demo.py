@@ -64,7 +64,7 @@ in a given round...
 """
 
 
-class Foracle: # 'faulty oracle'
+class User: # 'faulty oracle'
     def __init__(self, ground_truth_graph, honesty, misbelief, participation):
         self.g = mutate_graph(ground_truth_graph, misbelief)
         # misbelief is the amount the passed graph will be mutated in [0,1]
@@ -72,7 +72,7 @@ class Foracle: # 'faulty oracle'
         self.h = honesty
         self.p = participation
 
-    def browse_site(self, graph):
+    def browse(self, graph):
         # "browse" the passed graph
         # vote on existing nodes
         for n in graph.nodes():
@@ -117,16 +117,7 @@ class Foracle: # 'faulty oracle'
         
         # pretty sure don't have to return graph, should have been passed as ref
 
-
-    def suggest_nodes(self, ):
-        pass
-
-    def suggest_relation(self, n1, n2):
-        # suggest relationship between nodes n1 and n2
-        pass
-
-
-class Querier:
+class Site:
     def __init__(self, pop, graph_size, connect_prob):
         # misbelief (m), honesty (h), and participation (p) distro parameters
         h_mean, h_sd = 0.9, 0.3
