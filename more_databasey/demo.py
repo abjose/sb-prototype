@@ -34,6 +34,10 @@ can maybe decrease convergence time by asking liars fewer questions
 would be cool to allow clicking on nodes to highlight or something then
 showing paths including all dependences between nodes...
 
+need to keep track of everything every oracle says so can properly update
+values when get better idea of how trustworthy oracles are? Would be nicer if
+not...
+
 """
 
 
@@ -103,9 +107,31 @@ def get_random_relation():
     if r < p_type_of+p_part_of+p_prereq_of:
         return 'prereq-of'
 
-def mutate_graph(graph, wrongness):
-    # mutate a graph according to wrongness value
-    pass
+def mutate_graph(original_graph, wrongness):
+    # mutate a graph (add and remove nodes and edges) according to wrongness
+    # might be...overkill.
+    graph = original_graph.copy()
+    size = len(graph)
+    # remove nodes
+    for n in range(size):
+        if np.random.uniform() < wrongness:
+            graph.remove_node(n)
+    # add nodes - about as many as removed
+    for n in range(size):
+        if np.random.uniform() < wrongness:
+            graph.add_node(size+n) # make sure not to conflict with other nodes
+    # remove edges
+    for e in graph.edges():
+        if np.random.uniform() < wrongness:
+            graph.remove_edge(e)
+    # add edges
+    for i in graph.nodes():
+        for j in graph.nodes():
+            if np.random.uniform() < wrongness:
+                graph.add_edge(i,j)
+    # return results of mutation
+    return graph
+
 
 if __name__=='__main__':
     
@@ -121,6 +147,9 @@ if __name__=='__main__':
     r = nx.read_dot('test.dot')
     nx.draw(r)
     plt.show()
+    r = mutate_graph(r, 0.0)
+    nx.draw(r)
+    plt.show()
 
     # test writing dot file
     g = nx.DiGraph()
@@ -128,7 +157,8 @@ if __name__=='__main__':
     g.node['node1']['type'] = 'is-a'
     g.add_edges_from([('node1','node2'),
                       ('node2','node3')])
-    nx.write_dot(g, 'test_write.dot')
-    nx.draw(g)
-    plt.show()
+    #nx.write_dot(g, 'test_write.dot')
+    #nx.draw(g)
+    #plt.show()
+    
 
