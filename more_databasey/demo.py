@@ -68,6 +68,11 @@ TODO: ALSO NEED TO CHECK RELATION IS RIGHT
 lolz, just change so doesn't care if upvotes or downvotes exist?
 
 draw without labels?
+
+strange things seem to happen to voting when lying abound - should make sure
+each agent can only upvote or downvote?
+
+Maybe results will be better when scale agent vote power by trust.
 """
 
 
@@ -125,17 +130,17 @@ class Site:
     def __init__(self, pop, graph_size, connect_prob):
         # honesty (h), misbelief (m), and participation (p) distro parameters
         h_mean, h_sd = 1., .0001
-        m_mean, m_sd = 0., .0001
+        m_mean, m_sd = .2, .0001
         p_mean, p_sd = 1., .0001
         # make a random graph to try to approximate
         self.true_graph = get_random_graph(graph_size, connect_prob)
         # graph meant to approximate true_graph
         self.graph = nx.DiGraph()
         # set of users with honesty values following passed distribution
-        self.users = [User(self.true_graph, 1., 0., 1.)
-                           #clamp(np.random.normal(h_mean, h_sd),0.,1.),
-                           #clamp(np.random.normal(m_mean, m_sd),0.,1.),
-                           #clamp(np.random.normal(p_mean, p_sd),0.,1.),) 
+        self.users = [User(self.true_graph, #1., 0., 1.)
+                           clamp(np.random.normal(h_mean, h_sd),0.,1.),
+                           clamp(np.random.normal(m_mean, m_sd),0.,1.),
+                           clamp(np.random.normal(p_mean, p_sd),0.,1.),) 
                       for _ in range(pop)]
         # map from user to estimated 'reliablity' of user
         #self.trust = dict()
@@ -149,15 +154,31 @@ class Site:
     def run_until_convergence(self, ):
         pass
 
-    def show_difference(self, ):
+    def show_difference(self, filt=False):
         # display
-        plt.subplot(211)
+        plt.subplot(131)
         nx.draw(self.true_graph)
-        plt.subplot(212)
+        plt.subplot(132)
         nx.draw(self.graph)
+        plt.subplot(133)
+        nx.draw(self.get_filtered_graph())
         plt.show()
-        
         # calculate proportion difference?
+        
+    def get_filtered_graph(self, ):
+        # only keep components with more upvotes than downvotes
+        g2 = self.graph.copy()
+        for n in g2.nodes():
+            #print len(get_upvotes(g2.node[n]))
+            #print len(get_downvotes(g2.node[n]))
+            if len(get_upvotes(g2.node[n])) < len(get_downvotes(g2.node[n])):
+                g2.remove_node(n)
+        for i,j in g2.edges():
+            #print len(get_upvotes(g2.edge[i][j]))
+            #print len(get_downvotes(g2.edge[i][j]))
+            if len(get_upvotes(g2[i][j])) < len(get_downvotes(g2[i][j])):
+                g2.remove_edge(i,j)
+        return g2
 
     def get_user_reputation(self, user):
         # iterate over graph, get idea for how right the user is...
@@ -235,6 +256,11 @@ def add_upvote(d, user):
 def add_downvote(d, user):
     d['downvotes'] = d.get('downvotes', set()) | {user}
 
+def get_upvotes(d):
+    return d.get('upvotes', set())
+def get_downvotes(d):
+    return d.get('downvotes', set())
+
 
 if __name__=='__main__':
 
@@ -264,7 +290,7 @@ if __name__=='__main__':
 
     pop = 10
     size = 5
-    connect_prob = 0.3
+    connect_prob = 0.2
     s = Site(pop, size, connect_prob)
-    for _ in range(10): s.tick()
+    for _ in range(100): s.tick()
     s.show_difference()
