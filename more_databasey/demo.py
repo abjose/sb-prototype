@@ -266,5 +266,5 @@ if __name__=='__main__':
     size = 5
     connect_prob = 0.3
     s = Site(pop, size, connect_prob)
-    for _ in range(1): s.tick()
+    for _ in range(10): s.tick()
     s.show_difference()
