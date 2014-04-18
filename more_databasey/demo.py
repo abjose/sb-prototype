@@ -80,9 +80,6 @@ def clamp(n, a, b):
 
 def get_random_graph(n, p):
     # make random erdos-renyi graph with n nodes and connection probability p
-    # should assign types to edges!
-    
-    # init digraph
     G = nx.DiGraph()
     # add nodes
     G.add_nodes_from(range(n))
@@ -92,9 +89,7 @@ def get_random_graph(n, p):
             if np.random.uniform() < p:
                 # choose what kind of edge to make and add it to the graph
                 G.add_edge(i, j, relation=get_random_relation())
-    G.add_edges_from([(i,j)])
-    for i in range(n):
-        name = str(i+1)
+    return G
         
 def get_random_relation():
     # return a random type of relation as a string
