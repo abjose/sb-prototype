@@ -123,7 +123,7 @@ def mutate_graph(original_graph, wrongness):
     # remove edges
     for e in graph.edges():
         if np.random.uniform() < wrongness:
-            graph.remove_edge(e)
+            graph.remove_edge(*e)
     # add edges
     for i in graph.nodes():
         for j in graph.nodes():
@@ -144,21 +144,26 @@ if __name__=='__main__':
     #print g.edges()
 
     # test reading dot file
-    r = nx.read_dot('test.dot')
-    nx.draw(r)
-    plt.show()
-    r = mutate_graph(r, 0.0)
-    nx.draw(r)
-    plt.show()
+    #r = nx.read_dot('test.dot')
+    #nx.draw(r)
+    #plt.show()
 
     # test writing dot file
-    g = nx.DiGraph()
-    g.add_nodes_from(['node1','node2','node3'])
-    g.node['node1']['type'] = 'is-a'
-    g.add_edges_from([('node1','node2'),
-                      ('node2','node3')])
+    #g = nx.DiGraph()
+    #g.add_nodes_from(['node1','node2','node3'])
+    #g.node['node1']['type'] = 'is-a'
+    #g.add_edges_from([('node1','node2'),
+    #                  ('node2','node3')])
     #nx.write_dot(g, 'test_write.dot')
     #nx.draw(g)
     #plt.show()
     
 
+    g = get_random_graph(20, 0.1)
+    plt.subplot(211)
+    nx.draw(g)
+    #plt.show()
+    g = mutate_graph(g, .1)
+    plt.subplot(212)
+    nx.draw(g)
+    plt.show()
