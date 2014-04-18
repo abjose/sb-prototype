@@ -1,6 +1,7 @@
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
+from random import shuffle
 
 """
 
@@ -65,10 +66,12 @@ in a given round...
 TODO: ALSO NEED TO CHECK RELATION IS RIGHT
 
 lolz, just change so doesn't care if upvotes or downvotes exist?
+
+draw without labels?
 """
 
 
-class User: # 'faulty oracle'
+class User:
     def __init__(self, ground_truth_graph, honesty, misbelief, participation):
         self.g = mutate_graph(ground_truth_graph, misbelief)
         # misbelief is the amount the passed graph will be mutated in [0,1]
@@ -78,6 +81,27 @@ class User: # 'faulty oracle'
 
     def browse(self, graph):
         # "browse" the passed graph
+        # add nodes that don't yet exist in graph
+        new_nodes = [n for n in self.g.nodes() if n not in graph.nodes()]
+        for n in new_nodes:
+            if np.random.uniform() < self.p:
+                if np.random.uniform() < self.h:
+                    graph.add_node(n, upvotes=set([self]))
+                else:
+                    graph.add_node(np.random.randint(1000, 10000), 
+                                   upvotes=set([self]))
+
+        # add edges that don't yet exist in graph
+        new_edges = [e for e in self.g.edges() if e not in graph.edges()]
+        for i,j in new_edges:
+            if np.random.uniform() < self.p:
+                if np.random.uniform() < self.h:
+                    graph.add_edge(i,j, upvotes=set([self]))
+                else:
+                    graph.add_edge(np.random.randint(1000,10000), 
+                                   np.random.randint(1000,10000), 
+                                   upvotes=set([self]))
+
         # vote on existing nodes
         for n in graph.nodes():
             if np.random.uniform() < self.p:
@@ -94,50 +118,46 @@ class User: # 'faulty oracle'
                 if truth: add_upvote(graph.edge[i][j], self)
                 else:     add_downvote(graph.edge[i][j], self)
 
-        # add nodes that don't yet exist in graph
-        new_nodes = [n for n in self.g.nodes() if n not in graph.nodes()]
-        for n in new_nodes:
-            if np.random.uniform() < self.p:
-                if np.random.uniform() > self.h:
-                    graph.add_node(n, upvotes=set([self]))
-                else:
-                    graph.add_node(np.random.randint(1000, 10000), 
-                                   upvotes=set([self]))
+        
 
-        # add edges that don't yet exist in graph
-        new_edges = [e for e in self.g.edges() if e not in graph.edges()]
-        for i,j in new_edges:
-            if np.random.uniform() < self.p:
-                if np.random.uniform() > self.h:
-                    graph.add_edge(i,j, upvotes=set([self]))
-                else:
-                    graph.add_edge(np.random.randint(1000,10000), 
-                                   np.random.randint(1000,10000), 
-                                   upvotes=set([self]))
 
 class Site:
     def __init__(self, pop, graph_size, connect_prob):
-        # misbelief (m), honesty (h), and participation (p) distro parameters
-        h_mean, h_sd = 0.9, 0.3
-        m_mean, m_sd = 0.05, 0.1
-        p_mean, p_sd = 0.25, 0.8
+        # honesty (h), misbelief (m), and participation (p) distro parameters
+        h_mean, h_sd = 1., .0001
+        m_mean, m_sd = 0., .0001
+        p_mean, p_sd = 1., .0001
         # make a random graph to try to approximate
         self.true_graph = get_random_graph(graph_size, connect_prob)
         # graph meant to approximate true_graph
         self.graph = nx.DiGraph()
         # set of users with honesty values following passed distribution
-        self.users = [User(self.true_graph, 
-                           clamp(np.random.normal(h_mean, h_sd),0.,1.),
-                           clamp(np.random.normal(m_mean, m_sd),0.,1.),
-                           clamp(np.random.normal(p_mean, p_sd),0.,1.),) 
+        self.users = [User(self.true_graph, 1., 0., 1.)
+                           #clamp(np.random.normal(h_mean, h_sd),0.,1.),
+                           #clamp(np.random.normal(m_mean, m_sd),0.,1.),
+                           #clamp(np.random.normal(p_mean, p_sd),0.,1.),) 
                       for _ in range(pop)]
         # map from user to estimated 'reliablity' of user
         #self.trust = dict()
 
     def tick(self, ):
+        shuffle(self.users)
         for u in self.users:
-            # SHOULD PROBABLY SHUFFLE...
+            pass
             u.browse(self.graph)
+
+    def run_until_convergence(self, ):
+        pass
+
+    def show_difference(self, ):
+        # display
+        plt.subplot(211)
+        nx.draw(self.true_graph)
+        plt.subplot(212)
+        nx.draw(self.graph)
+        plt.show()
+        
+        # calculate proportion difference?
 
     def get_user_reputation(self, user):
         # iterate over graph, get idea for how right the user is...
@@ -243,8 +263,8 @@ if __name__=='__main__':
     #plt.show()
 
     pop = 10
-    size = 20
+    size = 5
     connect_prob = 0.3
     s = Site(pop, size, connect_prob)
-    s.tick()
-    
+    for _ in range(1): s.tick()
+    s.show_difference()
