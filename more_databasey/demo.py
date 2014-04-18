@@ -1,6 +1,3 @@
-#import yaml
-#import sys
-#import pprint
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -128,20 +125,12 @@ def mutate_graph(original_graph, wrongness):
     for i in graph.nodes():
         for j in graph.nodes():
             if np.random.uniform() < wrongness:
-                graph.add_edge(i,j)
+                graph.add_edge(i,j, relation=get_random_relation())
     # return results of mutation
     return graph
 
 
 if __name__=='__main__':
-    
-    # read yaml from stdin I guess
-    #db = yaml.load(sys.stdin)
-    # prettyprint it
-    #pp = pprint.PrettyPrinter()
-    #pp.pprint(db)
-    #g = nx.DiGraph(db)
-    #print g.edges()
 
     # test reading dot file
     #r = nx.read_dot('test.dot')
