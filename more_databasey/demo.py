@@ -211,22 +211,6 @@ def get_downvotes(d):
 
 if __name__=='__main__':
 
-    # test reading dot file
-    #r = nx.read_dot('test.dot')
-    #nx.draw(r)
-    #plt.show()
-
-    # test writing dot file
-    #g = nx.DiGraph()
-    #g.add_nodes_from(['node1','node2','node3'])
-    #g.node['node1']['type'] = 'is-a'
-    #g.add_edges_from([('node1','node2'),
-    #                  ('node2','node3')])
-    #nx.write_dot(g, 'test_write.dot')
-    #nx.draw(g)
-    #plt.show()
-    
-
     #g = get_random_graph(20, 0.1)
     #plt.subplot(211)
     #nx.draw(g)
