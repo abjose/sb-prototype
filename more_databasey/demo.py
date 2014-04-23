@@ -12,67 +12,14 @@ could just use networkx graph layouts? just show evolution of connections
 in series of plots/single plot? (cool if had dragger...)
 
 TODO
-- decide on what format to use
-- make one or more test graphs
-- read in to python as a networkx digraph
-- make a 'foracle' class that takes a networkx digraph and truthiness
-- give foracle 'suggest_node' and 'suggest_relation(n1,n2)' fns
-- make a 'querier' class that takes or makes a (list of) foracle object(s)
-- make querier query foracle about existence of and relations between nodesre
-- if possible - display series of networkx graphs representations with
-  a slider so you can slide through the graph over time
-  consider also adding sliders for changing mean/SD of truthiness of foracles
+- Weight votes by reputation
+- Make minimal GUI with sliders and stuff...kinda cool if could slide over time
+  but definitely not necessary
   to make sliders discrete: http://stackoverflow.com/questions/13656387/can-i-make-matplotlib-sliders-more-discrete
-
-DOESN'T EVEN HAVE TO BE AN ACTUAL GRAPH! JUST MAKE A RANDOM DIGRAPH? THEN
-SHOW HOW CLOSE APPROXIMATION IS TO GROUND TRUTH
-
-can maybe decrease convergence time by asking liars fewer questions
-
-would be cool to allow clicking on nodes to highlight or something then
-showing paths including all dependences between nodes...
-
-need to keep track of everything every oracle says so can properly update
-values when get better idea of how trustworthy oracles are? Would be nicer if
-not...
-
-
-Ok, to build approximation graph...
-iterate over all users - can choose to ask or not
-If choose to ask, find something you have low confidence in
-
-
-For updating trust, could give a 'test' question that you're fairly confident
-about and another you're not.
-
-Consider changing options available to oracles? Maybe can't suggest a node
-but can only suggest relations, and in doing so can suggest new nodes or 
-claim that a node doesn't exist
-
-Change design slightly:
-Rather than proposing to centralize thing, users collectively post modifications
-to the central graph based on their own versions. Then other users vote on
-whether they agree with the modification or not. This leads to a reputation
-score...easier to track user that proposed a change (and associate that change
-with the user's current rep) than to go in the other direction.
-
-So just have each graph component have two associated lists - upvoters
-and downvoters. "Belief" in component as well as reputation depends on 
-who votes on what.
-
-Also have a 'participation rate'? Probabiltiy that will actually participate
-in a given round...
-
-TODO: ALSO NEED TO CHECK RELATION IS RIGHT
-
-lolz, just change so doesn't care if upvotes or downvotes exist?
-
-draw without labels?
-
-strange things seem to happen to voting when lying abound - should make sure
+- ALSO NEED TO CHECK RELATION IS RIGHT
+- strange things seem to happen to voting when lying abound - should make sure
 each agent can only upvote or downvote?
-
-Maybe results will be better when scale agent vote power by trust.
+- use regression to figure out user characteristics?
 """
 
 
