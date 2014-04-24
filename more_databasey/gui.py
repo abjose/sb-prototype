@@ -10,6 +10,8 @@ http://matplotlib.org/examples/widgets/slider_demo.html
 TODO
 - add 'do 10 steps' button (unless can slide back and forth in time)
 - add something displaying quantitative difference between truth and graph
+- HOOK UP HONESTY, ETC.
+- BUG - hitting 'step' after restart seems to restart also...
 """
 
 fig, ax = plt.subplots()

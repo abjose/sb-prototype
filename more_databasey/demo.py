@@ -6,14 +6,13 @@ from random import shuffle
 """
 TODO
 - Weight votes by reputation
-- Make minimal GUI with sliders and stuff...kinda cool if could slide over time
-  but definitely not necessary
-  to make sliders discrete: http://stackoverflow.com/questions/13656387/can-i-make-matplotlib-sliders-more-discrete
 - ALSO NEED TO CHECK RELATION IS RIGHT
 - NOTE: strange things seem to happen to voting when lying 
         abound - should make sure each agent can only upvote or downvote?
 - use regression to figure out user characteristics?
 - use regression or something? ASK
+- print user rep vs. honesty, etc. to make sure makes sense
+- maybe show nodes/edges colored based on how trusted they are?
 """
 
 
@@ -64,7 +63,6 @@ class User:
                 if truth: add_upvote(graph.edge[i][j], self)
                 else:     add_downvote(graph.edge[i][j], self)
 
-        
 
 
 class Site:
@@ -104,7 +102,21 @@ class Site:
         plt.subplot(133)
         nx.draw(self.get_filtered_graph())
         plt.show()
-        # calculate proportion difference?
+        # calculate proportion difference
+        print self.get_accuracy()
+
+    def test_draw(self, ax1, ax2, ax3):
+        # probably a better way to do this
+        nx.draw_networkx(self.true_graph, ax=ax1)
+        nx.draw_networkx(self.graph, ax=ax2)
+        nx.draw_networkx(self.get_filtered_graph(), ax=ax3)
+        ax1.axes.get_xaxis().set_ticks([])
+        ax1.axes.get_yaxis().set_ticks([])
+        ax2.axes.get_xaxis().set_ticks([])
+        ax2.axes.get_yaxis().set_ticks([])
+        ax3.axes.get_xaxis().set_ticks([])
+        ax3.axes.get_yaxis().set_ticks([])
+        print self.get_accuracy()
         
     def get_filtered_graph(self, ):
         # only keep components with positive trust scores
@@ -138,15 +150,13 @@ class Site:
     def get_user_reputation(self, user):
         """ Calculate fraction of nodes in which user's votes agree 
             with the majority. """
-        total = 0
         majority = 0
         for n in self.graph.nodes():
-            total += 1
             uv = get_upvotes(self.graph.node[n])
             dv = get_downvotes(self.graph.node[n])
-            if n in max(uv, dv, key=len):
+            if user in max(uv, dv, key=len):
                 majority += 1
-        return float(majority) / total
+        return float(majority) / len(self.graph)
 
     def get_trust_scores(self, ):
         """ Get overall trust scores for graph components using user rep. """
@@ -160,13 +170,33 @@ class Site:
         for i,j in self.graph.edges():
             uv = [user_scores[u] for u in get_upvotes(self.graph.edge[i][j])]
             dv = [user_scores[u] for u in get_downvotes(self.graph.edge[i][j])]
-            component_scores[(i,j)] = uv - dv
+            #print sum(uv)
+            #print sum(dv)
+            component_scores[(i,j)] = sum(uv) - sum(dv)
+            #print component_scores[(i,j)]
         for n in self.graph.nodes():
             uv = [user_scores[u] for u in get_upvotes(self.graph.node[n])]
             dv = [user_scores[u] for u in get_downvotes(self.graph.node[n])]
-            component_scores[n] = uv - dv
+            component_scores[n] = sum(uv) - sum(dv)
 
         return component_scores
+
+    def get_accuracy(self, ):
+        """ Determine the % accuracy of generated graph to ground truth. """
+        # NEED TO ALSO GO IN REVERSE DIRECTION! Like count nodes in truth
+        # but not in graph
+        hits = 0
+        total = 0
+        g2 = self.get_filtered_graph().copy()
+        # iterate over every node and edge in self.graph
+        for n in self.true_graph.nodes():
+            if n in g2.nodes(): hits += 1
+            total += 1
+        for e in self.true_graph.edges():
+            if e in g2.edges(): hits += 1
+            total += 1
+        return float(hits) / total
+
 
 
 def clamp(n, a, b):
@@ -246,9 +276,9 @@ if __name__=='__main__':
     #nx.draw(g)
     #plt.show()
 
-    pop = 10
+    pop = 20
     size = 5
     connect_prob = 0.2
     s = Site(pop, size, connect_prob)
-    for _ in range(100): s.tick()
+    for _ in range(5000): s.tick()
     s.show_difference()
