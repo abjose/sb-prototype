@@ -4,13 +4,6 @@ import matplotlib.pyplot as plt
 from random import shuffle
 
 """
-
-Read in a yaml network description, put it into NetworkX
-
-use dotfiles?
-could just use networkx graph layouts? just show evolution of connections
-in series of plots/single plot? (cool if had dragger...)
-
 TODO
 - Weight votes by reputation
 - Make minimal GUI with sliders and stuff...kinda cool if could slide over time
@@ -20,6 +13,7 @@ TODO
 - strange things seem to happen to voting when lying abound - should make sure
 each agent can only upvote or downvote?
 - use regression to figure out user characteristics?
+- use regression or something? ASK
 """
 
 
@@ -128,12 +122,17 @@ class Site:
         return g2
 
     def get_user_reputation(self, user):
-        # iterate over graph, get idea for how right the user is...
-        # could just have numerator of sum of people that seem to be right
-        # and agree, denom opposite
-        # so if upvotes and thing has lots of upvotes, numerator += len(upvotes)
-        # and denom += len(downvotes)...can switch if downvotes look right..
-        pass
+        """ Calculate fraction of nodes in which user's votes agree 
+            with the majority  """
+        total = 0
+        majority = 0
+        for n in self.graph.nodes():
+            total += 1
+            up = get_upvotes(self.graph.node[n])
+            dn = get_downvotes(self.graph.node[n])
+            if n in max(up, dn, key=len):
+                majority += 1
+        return float(majority) / total
 
     def get_trust_rankings(self, ):
         # return list of users from high to low trust values
