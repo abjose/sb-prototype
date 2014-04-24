@@ -10,8 +10,8 @@ TODO
   but definitely not necessary
   to make sliders discrete: http://stackoverflow.com/questions/13656387/can-i-make-matplotlib-sliders-more-discrete
 - ALSO NEED TO CHECK RELATION IS RIGHT
-- strange things seem to happen to voting when lying abound - should make sure
-each agent can only upvote or downvote?
+- NOTE: strange things seem to happen to voting when lying 
+        abound - should make sure each agent can only upvote or downvote?
 - use regression to figure out user characteristics?
 - use regression or something? ASK
 """
@@ -107,7 +107,8 @@ class Site:
         # calculate proportion difference?
         
     def get_filtered_graph(self, ):
-        # only keep components with more upvotes than downvotes
+        # only keep components with positive trust scores
+        """
         g2 = self.graph.copy()
         for n in g2.nodes():
             #print len(get_upvotes(g2.node[n]))
@@ -120,25 +121,52 @@ class Site:
             if len(get_upvotes(g2[i][j])) < len(get_downvotes(g2[i][j])):
                 g2.remove_edge(i,j)
         return g2
+        """
+        T = self.get_trust_scores()
+        g2 = self.graph.copy()
+        for n in g2.nodes():
+            #print len(get_upvotes(g2.node[n]))
+            #print len(get_downvotes(g2.node[n]))
+            if T[n] <= 0: g2.remove_node(n)
+        for i,j in g2.edges():
+            #print len(get_upvotes(g2.edge[i][j]))
+            #print len(get_downvotes(g2.edge[i][j]))
+            if T[(i,j)] <= 0: g2.remove_edge(i,j)
+        return g2
+        #"""
 
     def get_user_reputation(self, user):
         """ Calculate fraction of nodes in which user's votes agree 
-            with the majority  """
+            with the majority. """
         total = 0
         majority = 0
         for n in self.graph.nodes():
             total += 1
-            up = get_upvotes(self.graph.node[n])
-            dn = get_downvotes(self.graph.node[n])
-            if n in max(up, dn, key=len):
+            uv = get_upvotes(self.graph.node[n])
+            dv = get_downvotes(self.graph.node[n])
+            if n in max(uv, dv, key=len):
                 majority += 1
         return float(majority) / total
 
-    def get_trust_rankings(self, ):
-        # return list of users from high to low trust values
-        # might want to ask questions in proportion to trust instead of
-        # asking, say, top 10?
-        pass
+    def get_trust_scores(self, ):
+        """ Get overall trust scores for graph components using user rep. """
+        # get user reputation scores
+        user_scores = {}
+        for u in self.users:
+            user_scores[u] = self.get_user_reputation(u)
+
+        # find score for each graph component
+        component_scores = {}
+        for i,j in self.graph.edges():
+            uv = [user_scores[u] for u in get_upvotes(self.graph.edge[i][j])]
+            dv = [user_scores[u] for u in get_downvotes(self.graph.edge[i][j])]
+            component_scores[(i,j)] = uv - dv
+        for n in self.graph.nodes():
+            uv = [user_scores[u] for u in get_upvotes(self.graph.node[n])]
+            dv = [user_scores[u] for u in get_downvotes(self.graph.node[n])]
+            component_scores[n] = uv - dv
+
+        return component_scores
 
 
 def clamp(n, a, b):
