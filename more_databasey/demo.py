@@ -5,14 +5,12 @@ from random import shuffle
 
 """
 TODO
-- Weight votes by reputation
 - ALSO NEED TO CHECK RELATION IS RIGHT
-- NOTE: strange things seem to happen to voting when lying 
-        abound - should make sure each agent can only upvote or downvote?
 - use regression to figure out user characteristics?
 - use regression or something? ASK
 - print user rep vs. honesty, etc. to make sure makes sense
 - maybe show nodes/edges colored based on how trusted they are?
+- auto-delete graph components with very low scores? (not as filtering step)
 """
 
 
@@ -22,10 +20,11 @@ class User:
         # misbelief is the amount the passed graph will be mutated in [0,1]
         # honesty is proportion of truths told in [0,1]
         self.h = honesty
+        self.m = misbelief # just in case, don't actually need to store
         self.p = participation
 
     def browse(self, graph):
-        # "browse" the passed graph
+        """ 'Browse' the passed graph """
         # add nodes that don't yet exist in graph
         new_nodes = [n for n in self.g.nodes() if n not in graph.nodes()]
         for n in new_nodes:
@@ -52,6 +51,10 @@ class User:
             if np.random.uniform() < self.p:
                 truth = n in self.g.nodes()
                 if np.random.uniform() > self.h: truth = not truth
+                # remove previous vote
+                del_upvote(graph.node[n], self)
+                del_downvote(graph.node[n], self)
+                # add new vote
                 if truth: add_upvote(graph.node[n], self)
                 else:     add_downvote(graph.node[n], self)
 
@@ -60,6 +63,10 @@ class User:
             if np.random.uniform() < self.p:
                 truth = (i,j) in self.g.edges()
                 if np.random.uniform() > self.h: truth = not truth
+                # remove previous vote
+                del_upvote(graph[i][j], self)
+                del_downvote(graph[i][j], self)
+                # add new vote
                 if truth: add_upvote(graph.edge[i][j], self)
                 else:     add_downvote(graph.edge[i][j], self)
 
@@ -68,9 +75,9 @@ class User:
 class Site:
     def __init__(self, pop, graph_size, connect_prob):
         # honesty (h), misbelief (m), and participation (p) distro parameters
-        h_mean, h_sd = 1., .0001
-        m_mean, m_sd = .2, .0001
-        p_mean, p_sd = 1., .0001
+        h_mean, h_sd = .7, .2
+        m_mean, m_sd = .2, .2
+        p_mean, p_sd = .4, .2
         # make a random graph to try to approximate
         self.true_graph = get_random_graph(graph_size, connect_prob)
         # graph meant to approximate true_graph
@@ -87,7 +94,6 @@ class Site:
     def tick(self, ):
         shuffle(self.users)
         for u in self.users:
-            pass
             u.browse(self.graph)
 
     def run_until_convergence(self, ):
@@ -137,8 +143,8 @@ class Site:
         T = self.get_trust_scores()
         g2 = self.graph.copy()
         for n in g2.nodes():
-            #print len(get_upvotes(g2.node[n]))
-            #print len(get_downvotes(g2.node[n]))
+            print len(get_upvotes(g2.node[n]))
+            print len(get_downvotes(g2.node[n]))
             if T[n] <= 0: g2.remove_node(n)
         for i,j in g2.edges():
             #print len(get_upvotes(g2.edge[i][j]))
@@ -156,6 +162,7 @@ class Site:
             dv = get_downvotes(self.graph.node[n])
             if user in max(uv, dv, key=len):
                 majority += 1
+
         return float(majority) / len(self.graph)
 
     def get_trust_scores(self, ):
@@ -164,6 +171,17 @@ class Site:
         user_scores = {}
         for u in self.users:
             user_scores[u] = self.get_user_reputation(u)
+
+        sorted_users = sorted(self.users, key=lambda u: user_scores[u], 
+                              reverse=True)
+        # print out user stats to see if reputation is useful...
+        #for u in sorted_users:
+        #    print user_scores[u]
+        #print 'reputation:\t', float(majority) / len(self.graph)
+        #print 'honesty:\t',     user.h
+        #print 'misbelief:\t',   user.m
+        #print 'participatn:\t', user.p
+        print 
 
         # find score for each graph component
         component_scores = {}
@@ -183,8 +201,8 @@ class Site:
 
     def get_accuracy(self, ):
         """ Determine the % accuracy of generated graph to ground truth. """
-        # NEED TO ALSO GO IN REVERSE DIRECTION! Like count nodes in truth
-        # but not in graph
+        # NEED TO ALSO GO IN REVERSE DIRECTION! Like count nodes in truth but
+        # not in graph
         hits = 0
         total = 0
         g2 = self.get_filtered_graph().copy()
@@ -259,6 +277,11 @@ def add_upvote(d, user):
     d['upvotes'] = d.get('upvotes', set()) | {user}
 def add_downvote(d, user):
     d['downvotes'] = d.get('downvotes', set()) | {user}
+
+def del_upvote(d, user):
+    d['upvotes'] = d.get('upvotes', set()) - {user}
+def del_downvote(d, user):
+    d['downvotes'] = d.get('downvotes', set()) - {user}
 
 def get_upvotes(d):
     return d.get('upvotes', set())
