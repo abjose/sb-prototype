@@ -32,7 +32,7 @@ axhonest = plt.axes([0.15, 0.16, 0.65, 0.02], axisbg=axcolor)
 axpart   = plt.axes([0.15, 0.19, 0.65, 0.02], axisbg=axcolor)
 axmisb   = plt.axes([0.15, 0.22, 0.65, 0.02], axisbg=axcolor)
 
-spop   = Slider(axpop,   'Population',   1,  500,   valinit=20, valfmt='%1.0f')
+spop   = Slider(axpop,   'Population',   1,  500,   valinit=100, valfmt='%1.0f')
 sprob  = Slider(axprob,  'Probability',  0., 1.,    valinit=0.3)
 snodes = Slider(axnodes, 'Nodes',        1,  100,   valinit=5,  valfmt='%1.0f')
 
@@ -44,8 +44,11 @@ smisb   = Slider(axmisb,   'Misbelief',     0., 1., valinit=.75)
 pop = 20
 size = 5
 connect_prob = 0.2
-s = Site(pop, size, connect_prob)
-for _ in range(100): s.tick()
+s = Site(int(round(spop.val)), 
+             int(round(snodes.val)), 
+             sprob.val)    
+#s = Site(pop, size, connect_prob)
+for _ in range(1): s.tick()
 s.test_draw(ax1, ax2, ax3)
 
 axrestart = plt.axes([0.65, 0.015, 0.1, 0.035])
@@ -63,11 +66,13 @@ def restart(event):
     #spop.reset()
 brestart.on_clicked(restart)
 
+restart(None)
 
 axstep = plt.axes([0.53, 0.015, 0.1, 0.035])
 bstep = Button(axstep, 'Step 10', color=axcolor, hovercolor='0.975')
 def step(event):
-    for _ in range(50): s.tick()
+    #for _ in range(50): s.tick()
+    for _ in range(1): s.tick()
     ax1.cla()
     ax2.cla()
     ax3.cla()
