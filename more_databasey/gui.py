@@ -7,10 +7,7 @@ code initally taken from:
 http://matplotlib.org/examples/widgets/slider_demo.html
 
 TODO
-- add 'do 10 steps' button (unless can slide back and forth in time)
 - add something displaying quantitative difference between truth and graph
-- BUG - hitting 'step' after restart seems to restart also...
-- setting nodes to something other than valinit, then stepping...makes reset
 """
 
 fig, ax = plt.subplots()
@@ -38,10 +35,6 @@ snodes = Slider(axnodes, 'Nodes',       1,  100, valinit=5,  valfmt='%1.0f')
 shonest = Slider(axhonest, 'Honesty',       0., 1., valinit=.7)
 smisb   = Slider(axmisb,   'Misbelief',     0., 1., valinit=.2)
 spart   = Slider(axpart,   'Participation', 0., 1., valinit=.4)
-
-
-
-# SOMETHING WEIRD WITH INIT STILL...?
 
 
 #pop = 20
