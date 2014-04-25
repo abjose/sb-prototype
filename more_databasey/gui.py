@@ -1,4 +1,3 @@
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, RadioButtons
 from demo import Site
@@ -57,6 +56,7 @@ s.test_draw(ax1, ax2, ax3)
 axrestart = plt.axes([0.65, 0.015, 0.1, 0.035])
 brestart = Button(axrestart, 'Restart', color=axcolor, hovercolor='0.975')
 def restart(event):
+    global s
     s = Site(int(round(spop.val)), int(round(snodes.val)), sprob.val,
              shonest.val, smisb.val, spart.val)    
     for _ in range(10): s.tick()
@@ -68,11 +68,10 @@ def restart(event):
     #spop.reset()
 brestart.on_clicked(restart)
 
-#restart(None)
-
 axstep = plt.axes([0.53, 0.015, 0.1, 0.035])
 bstep = Button(axstep, 'Step 10', color=axcolor, hovercolor='0.975')
 def step(event):
+    global s
     #for _ in range(50): s.tick()
     for _ in range(10): s.tick()
     ax1.cla()
