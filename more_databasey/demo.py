@@ -6,7 +6,6 @@ from random import shuffle
 """
 TODO
 - ALSO NEED TO CHECK RELATION IS RIGHT
-- use regression to figure out user characteristics?
 - use regression or something? ASK
 - print user rep vs. honesty, etc. to make sure makes sense
 - maybe show nodes/edges colored based on how trusted they are?
@@ -126,20 +125,6 @@ class Site:
         
     def get_filtered_graph(self, ):
         # only keep components with positive trust scores
-        """
-        g2 = self.graph.copy()
-        for n in g2.nodes():
-            #print len(get_upvotes(g2.node[n]))
-            #print len(get_downvotes(g2.node[n]))
-            if len(get_upvotes(g2.node[n])) < len(get_downvotes(g2.node[n])):
-                g2.remove_node(n)
-        for i,j in g2.edges():
-            #print len(get_upvotes(g2.edge[i][j]))
-            #print len(get_downvotes(g2.edge[i][j]))
-            if len(get_upvotes(g2[i][j])) < len(get_downvotes(g2[i][j])):
-                g2.remove_edge(i,j)
-        return g2
-        """
         T = self.get_trust_scores()
         g2 = self.graph.copy()
         for n in g2.nodes():
