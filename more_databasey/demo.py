@@ -72,17 +72,20 @@ class User:
 
 
 class Site:
-    def __init__(self, pop, graph_size, connect_prob):
+    def __init__(self, pop, graph_size, connect_prob,
+                 h_mean, m_mean, p_mean):
         # honesty (h), misbelief (m), and participation (p) distro parameters
-        h_mean, h_sd = .7, .2
-        m_mean, m_sd = .2, .2
-        p_mean, p_sd = .4, .2
+        h_sd = .2
+        m_sd = .2
+        p_sd = .2
+        print h_mean, m_mean, p_mean
+        print pop, graph_size, connect_prob
         # make a random graph to try to approximate
         self.true_graph = get_random_graph(graph_size, connect_prob)
         # graph meant to approximate true_graph
         self.graph = nx.DiGraph()
         # set of users with honesty values following passed distribution
-        self.users = [User(self.true_graph, #1., 0., 1.)
+        self.users = [User(self.true_graph,
                            clamp(np.random.normal(h_mean, h_sd),0.,1.),
                            clamp(np.random.normal(m_mean, m_sd),0.,1.),
                            clamp(np.random.normal(p_mean, p_sd),0.,1.),) 
@@ -128,8 +131,8 @@ class Site:
         T = self.get_trust_scores()
         g2 = self.graph.copy()
         for n in g2.nodes():
-            print len(get_upvotes(g2.node[n]))
-            print len(get_downvotes(g2.node[n]))
+            #print len(get_upvotes(g2.node[n]))
+            #print len(get_downvotes(g2.node[n]))
             if T[n] <= 0: g2.remove_node(n)
         for i,j in g2.edges():
             #print len(get_upvotes(g2.edge[i][j]))
@@ -287,6 +290,6 @@ if __name__=='__main__':
     pop = 20
     size = 5
     connect_prob = 0.2
-    s = Site(pop, size, connect_prob)
+    s = Site(pop, size, connect_prob, 1., 0., 1.)
     for _ in range(5000): s.tick()
     s.show_difference()
